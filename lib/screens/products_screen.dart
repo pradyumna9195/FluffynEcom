@@ -20,6 +20,17 @@ class ProductsScreen extends StatefulWidget {
 class _ProductsScreenState extends State<ProductsScreen> {
   bool _isInit = true;
   bool _isGrid = true; // Toggle between grid and list view
+  String _selectedCategory = 'All'; // Current selected category filter
+
+  // Pet shop categories
+  final List<String> _categories = [
+    'All',
+    'Dogs',
+    'Cats',
+    'Food',
+    'Toys',
+    'Accessories',
+  ];
 
   @override
   void didChangeDependencies() {
@@ -39,9 +50,31 @@ class _ProductsScreenState extends State<ProductsScreen> {
     final isLoading = productProvider.isLoading;
     final error = productProvider.error;
 
+    // Filter products by category if not 'All'
+    final displayedProducts =
+        _selectedCategory == 'All'
+            ? apiProducts
+            : apiProducts.where((p) {
+              // This is a simple filter, in a real app you'd have proper category data
+              final name = p.title.toLowerCase();
+              final category = _selectedCategory.toLowerCase();
+              return name.contains(category);
+            }).toList();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Fluffyn Shop'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Fluffyn ',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge!.copyWith(color: Colors.white),
+            ),
+            const Text('🐾', style: TextStyle(fontSize: 24)),
+          ],
+        ),
         actions: [
           // Toggle view button
           IconButton(
@@ -84,7 +117,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         ),
                     const SizedBox(height: 16),
                     Text(
-                      'Loading products...',
+                      'Fetching pet products...',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ],
@@ -129,6 +162,168 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Welcome banner
+                    Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          margin: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(24),
+                            gradient: LinearGradient(
+                              colors: [
+                                Theme.of(context).colorScheme.primary,
+                                Theme.of(
+                                  context,
+                                ).colorScheme.primary.withOpacity(0.7),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Text(
+                                    '🐕',
+                                    style: TextStyle(fontSize: 24),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Welcome to Fluffyn!',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.headlineSmall!.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Find the best products for your furry friends',
+                                style: Theme.of(context).textTheme.bodyLarge!
+                                    .copyWith(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        )
+                        .animate()
+                        .fadeIn(duration: 500.ms)
+                        .slideY(
+                          begin: 0.2,
+                          end: 0,
+                          duration: 500.ms,
+                          curve: Curves.easeOutCubic,
+                        ),
+
+                    // Category filter scrollable row
+                    Container(
+                      height: 60,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _categories.length,
+                        itemBuilder: (ctx, index) {
+                          final category = _categories[index];
+                          final isSelected = category == _selectedCategory;
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedCategory = category;
+                              });
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(right: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color:
+                                    isSelected
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context).colorScheme.surface,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color:
+                                      isSelected
+                                          ? Theme.of(
+                                            context,
+                                          ).colorScheme.primary
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .secondary
+                                              .withOpacity(0.3),
+                                  width: 1.5,
+                                ),
+                                boxShadow:
+                                    isSelected
+                                        ? [
+                                          BoxShadow(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                                .withOpacity(0.3),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 3),
+                                          ),
+                                        ]
+                                        : null,
+                              ),
+                              child: Row(
+                                children: [
+                                  // Add an appropriate emoji for each category
+                                  if (category == 'Dogs')
+                                    const Text(
+                                      '🐕 ',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  if (category == 'Cats')
+                                    const Text(
+                                      '🐈 ',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  if (category == 'Food')
+                                    const Text(
+                                      '🍖 ',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  if (category == 'Toys')
+                                    const Text(
+                                      '🧸 ',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  if (category == 'Accessories')
+                                    const Text(
+                                      '🧣 ',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  if (category == 'All')
+                                    const Text(
+                                      '🐾 ',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  Text(
+                                    category,
+                                    style: TextStyle(
+                                      fontWeight:
+                                          isSelected
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                      color: isSelected ? Colors.white : null,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ).animate().fadeIn(duration: 400.ms, delay: 200.ms),
+
                     // API Products
                     Padding(
                       padding: const EdgeInsets.only(
@@ -137,33 +332,89 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         top: 16,
                         bottom: 8,
                       ),
-                      child: Text(
-                        'All Products',
-                        style: Theme.of(context).textTheme.titleLarge,
+                      child: Row(
+                        children: [
+                          const Text('🐾', style: TextStyle(fontSize: 18)),
+                          const SizedBox(width: 8),
+                          Text(
+                            _selectedCategory == 'All'
+                                ? 'All Products'
+                                : '${_selectedCategory} Products',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Text(
+                              '${displayedProducts.length} items',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+
                     SizedBox(
                       height: _isGrid ? 500 : 400,
                       child:
-                          _isGrid
-                              ? ProductGrid(products: apiProducts)
+                          displayedProducts.isEmpty
+                              ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Text(
+                                      '😿',
+                                      style: TextStyle(fontSize: 48),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'No products found',
+                                      style:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.titleLarge,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Try a different category',
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                  ],
+                                ),
+                              )
+                              : _isGrid
+                              ? ProductGrid(products: displayedProducts)
                               : ListView.builder(
                                 padding: const EdgeInsets.all(8),
-                                itemCount: apiProducts.length,
+                                itemCount: displayedProducts.length,
                                 itemBuilder:
-                                    (ctx, i) =>
-                                        ProductListItem(product: apiProducts[i])
-                                            .animate(delay: (50 * i).ms)
-                                            .fadeIn(
-                                              duration: 300.ms,
-                                              curve: Curves.easeOut,
-                                            )
-                                            .slideY(
-                                              begin: 0.1,
-                                              end: 0,
-                                              curve: Curves.easeOut,
-                                              duration: 300.ms,
-                                            ),
+                                    (ctx, i) => ProductListItem(
+                                          product: displayedProducts[i],
+                                        )
+                                        .animate(delay: (50 * i).ms)
+                                        .fadeIn(
+                                          duration: 300.ms,
+                                          curve: Curves.easeOut,
+                                        )
+                                        .slideY(
+                                          begin: 0.1,
+                                          end: 0,
+                                          curve: Curves.easeOut,
+                                          duration: 300.ms,
+                                        ),
                               ),
                     ),
 
@@ -178,6 +429,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         ),
                         child: Row(
                           children: [
+                            const Text('👤', style: TextStyle(fontSize: 18)),
+                            const SizedBox(width: 8),
                             Text(
                               'My Products',
                               style: Theme.of(context).textTheme.titleLarge,
@@ -204,7 +457,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         ),
                       ),
                       SizedBox(
-                        height: _isGrid ? 400 : 300,
+                        height: _isGrid ? 350 : 250,
                         child:
                             _isGrid
                                 ? ProductGrid(products: userProducts)
@@ -229,6 +482,51 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                 ),
                       ),
                     ],
+
+                    // Pet care tips
+                    Container(
+                      margin: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.secondary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.secondary.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Text('💡', style: TextStyle(fontSize: 20)),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Pet Care Tip',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.titleMedium!.copyWith(
+                                  color:
+                                      Theme.of(context).colorScheme.secondary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Regular grooming is important for your pet\'s health. Brush your pet\'s fur at least once a week.',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
+                    ).animate().fadeIn(duration: 400.ms, delay: 500.ms),
+
+                    const SizedBox(height: 40), // Bottom padding
                   ],
                 ),
               ),
@@ -239,10 +537,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
           );
         },
         child: const Icon(Icons.add),
-      ).animate().scale(
-        duration: 300.ms,
-        curve: Curves.elasticOut,
-        delay: 300.ms,
       ),
     );
   }

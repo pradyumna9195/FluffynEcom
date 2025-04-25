@@ -9,15 +9,42 @@ import '../screens/cart_screen.dart';
 class ProductGridItem extends StatelessWidget {
   final Product product;
 
-  const ProductGridItem({Key? key, required this.product}) : super(key: key);
+  const ProductGridItem({super.key, required this.product});
+
+  // Get a themed emoji for product based on its title
+  String _getProductEmoji(String title) {
+    final normalizedTitle = title.toLowerCase();
+    if (normalizedTitle.contains('dog') || normalizedTitle.contains('puppy')) {
+      return '🐕';
+    } else if (normalizedTitle.contains('cat') ||
+        normalizedTitle.contains('kitten')) {
+      return '🐈';
+    } else if (normalizedTitle.contains('food') ||
+        normalizedTitle.contains('treat')) {
+      return '🍖';
+    } else if (normalizedTitle.contains('toy')) {
+      return '🧸';
+    } else if (normalizedTitle.contains('collar') ||
+        normalizedTitle.contains('leash')) {
+      return '🧣';
+    } else if (normalizedTitle.contains('bed')) {
+      return '🛏️';
+    } else if (normalizedTitle.contains('bowl')) {
+      return '🥣';
+    }
+    return '🐾';
+  }
 
   @override
   Widget build(BuildContext context) {
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
+    final emoji = _getProductEmoji(product.title);
+    final isNew =
+        product.id != null && product.id! % 3 == 0; // Fixed null check
 
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: InkWell(
         onTap: () {
           Navigator.of(context).push(
@@ -26,92 +53,191 @@ class ProductGridItem extends StatelessWidget {
             ),
           );
         },
-        borderRadius: BorderRadius.circular(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+        borderRadius: BorderRadius.circular(24),
+        child: Stack(
           children: [
-            // Product Image
-            Expanded(
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  topRight: Radius.circular(10),
-                ),
-                child: Hero(
-                  tag: 'product-${product.id}',
-                  child: CachedNetworkImage(
-                    imageUrl: product.image,
-                    fit: BoxFit.contain,
-                    placeholder:
-                        (context, url) =>
-                            const Center(child: CircularProgressIndicator()),
-                    errorWidget:
-                        (context, url, error) => Container(
-                          color: Colors.grey[200],
-                          child: const Icon(Icons.image, size: 50),
-                        ),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title with ellipsis
-                  Text(
-                    product.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  // Price
-                  Text(
-                    '\$${product.price.toStringAsFixed(2)}',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Product Image
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      topRight: Radius.circular(24),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  // Add to cart button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        cartProvider.addItem(product);
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text('Added item to cart!'),
-                            duration: const Duration(seconds: 2),
-                            action: SnackBarAction(
-                              label: 'VIEW CART',
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (ctx) => const CartScreen(),
-                                  ),
-                                );
-                              },
+                    child: Stack(
+                      children: [
+                        Hero(
+                          tag: 'product-${product.id}',
+                          child: CachedNetworkImage(
+                            imageUrl: product.image,
+                            fit: BoxFit.contain,
+                            placeholder:
+                                (context, url) => const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                            errorWidget:
+                                (context, url, error) => Container(
+                                  color: Colors.grey[200],
+                                  child: const Icon(Icons.image, size: 50),
+                                ),
+                          ),
+                        ),
+                        // Pet type indicator in top left corner
+                        Positioned(
+                          top: 8,
+                          left: 8,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.8),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              emoji,
+                              style: const TextStyle(fontSize: 14),
                             ),
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 8,
                         ),
-                      ),
-                      child: const Text('Add to Cart'),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Title with ellipsis
+                      Text(
+                        product.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      // Price
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '\$${product.price.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          // Rating
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                // Mock rating with null check
+                                (3.5 + ((product.id ?? 0) % 20) / 10)
+                                    .toStringAsFixed(1),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      // Add to cart button
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            cartProvider.addItem(product);
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Row(
+                                  children: [
+                                    Text(emoji),
+                                    const SizedBox(width: 8),
+                                    const Text('Added to cart!'),
+                                  ],
+                                ),
+                                duration: const Duration(seconds: 2),
+                                action: SnackBarAction(
+                                  label: 'VIEW CART',
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (ctx) => const CartScreen(),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 8,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.shopping_cart, size: 16),
+                              const SizedBox(width: 8),
+                              const Text('Add to Cart'),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
+            // New badge if applicable
+            if (isNew)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondary,
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(24),
+                      bottomLeft: Radius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'NEW',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

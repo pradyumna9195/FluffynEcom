@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
 import '../providers/product_provider.dart';
 import '../screens/add_edit_product_screen.dart';
 import '../screens/cart_screen.dart';
+import '../widgets/theme_switch.dart';
 
 class ProductDetailScreen extends StatelessWidget {
   final Product product;
@@ -30,6 +32,10 @@ class ProductDetailScreen extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         actions: [
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: ThemeSwitch(),
+          ),
           if (isUserAdded)
             IconButton(
               icon: const Icon(Icons.edit),
@@ -119,91 +125,166 @@ class ProductDetailScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '\$${product.price.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (product.rating != null)
-                        Row(
-                          children: [
-                            const Icon(Icons.star, color: Colors.amber),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${product.rating!.rate} (${product.rating!.count})',
-                              style: const TextStyle(fontSize: 16),
+                            '\$${product.price.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
-                          ],
-                        ),
+                          )
+                          .animate()
+                          .fadeIn(duration: 300.ms, delay: 200.ms)
+                          .slideX(begin: -0.2, end: 0, duration: 300.ms),
+
+                      if (product.rating != null)
+                        Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.secondary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.star,
+                                    color: Colors.amber,
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${product.rating!.rate} (${product.rating!.count})',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).colorScheme.secondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                            .animate()
+                            .fadeIn(duration: 300.ms, delay: 200.ms)
+                            .slideX(begin: 0.2, end: 0, duration: 300.ms),
                     ],
                   ),
                   const SizedBox(height: 16),
                   // Category
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.secondary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      product.category.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Theme.of(context).colorScheme.secondary,
+                              Theme.of(
+                                context,
+                              ).colorScheme.secondary.withOpacity(0.7),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          product.category.toUpperCase(),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      )
+                      .animate()
+                      .fadeIn(duration: 300.ms, delay: 300.ms)
+                      .scale(
+                        begin: const Offset(0.8, 0.8),
+                        end: const Offset(1.0, 1.0),
+                        duration: 300.ms,
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+
+                  const SizedBox(height: 24),
                   // Description
-                  const Text(
+                  Text(
                     'Description',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ).animate().fadeIn(duration: 300.ms, delay: 400.ms),
+
                   const SizedBox(height: 8),
+
                   Text(
                     product.description,
-                    style: const TextStyle(fontSize: 16, height: 1.5),
-                  ),
-                  const SizedBox(height: 24),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(height: 1.5),
+                  ).animate().fadeIn(duration: 300.ms, delay: 500.ms),
+
+                  const SizedBox(height: 32),
+
                   // Add to cart button
                   SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        cartProvider.addItem(product);
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text('Added item to cart!'),
-                            duration: const Duration(seconds: 2),
-                            action: SnackBarAction(
-                              label: 'VIEW CART',
-                              onPressed: () {
-                                // Navigate to cart screen
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (ctx) => const CartScreen(),
-                                  ),
-                                );
-                              },
+                        width: double.infinity,
+                        height: 54,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            cartProvider.addItem(product);
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text('Added item to cart!'),
+                                duration: const Duration(seconds: 2),
+                                action: SnackBarAction(
+                                  label: 'VIEW CART',
+                                  onPressed: () {
+                                    // Navigate to cart screen
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (ctx) => const CartScreen(),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
                             ),
                           ),
-                        );
-                      },
-                      icon: const Icon(Icons.shopping_cart),
-                      label: const Text('ADD TO CART'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                    ),
-                  ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.shopping_cart),
+                              const SizedBox(width: 8),
+                              Text(
+                                'ADD TO CART',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.white
+                                          : Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                      .animate()
+                      .fadeIn(duration: 300.ms, delay: 600.ms)
+                      .slideY(begin: 0.2, end: 0, duration: 300.ms),
                 ],
               ),
             ),

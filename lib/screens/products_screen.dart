@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/product_provider.dart';
 import '../widgets/product_grid.dart';
 import '../widgets/product_list_item.dart';
 import '../widgets/cart_badge.dart';
+import '../widgets/theme_switch.dart';
 import 'cart_screen.dart';
 import 'profile_screen.dart';
 import 'add_edit_product_screen.dart';
@@ -50,6 +52,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
               });
             },
           ),
+          // Theme switch
+          const Padding(
+            padding: EdgeInsets.only(right: 8.0),
+            child: ThemeSwitch(),
+          ),
           // Cart button with badge
           const CartBadge(),
           // Profile button
@@ -65,13 +72,39 @@ class _ProductsScreenState extends State<ProductsScreen> {
       ),
       body:
           isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator()
+                        .animate(onPlay: (controller) => controller.repeat())
+                        .shimmer(
+                          duration: 1200.ms,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Loading products...',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ],
+                ),
+              )
               : error.isNotEmpty
               ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error, size: 60, color: Colors.red),
+                    Icon(
+                      Icons.error,
+                      size: 60,
+                      color: Colors.red,
+                    ).animate().scale(
+                      duration: 700.ms,
+                      curve: Curves.easeOut,
+                      begin: const Offset(0.5, 0.5),
+                      end: const Offset(1.0, 1.0),
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'Error loading products',
@@ -118,9 +151,19 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                 padding: const EdgeInsets.all(8),
                                 itemCount: apiProducts.length,
                                 itemBuilder:
-                                    (ctx, i) => ProductListItem(
-                                      product: apiProducts[i],
-                                    ),
+                                    (ctx, i) =>
+                                        ProductListItem(product: apiProducts[i])
+                                            .animate(delay: (50 * i).ms)
+                                            .fadeIn(
+                                              duration: 300.ms,
+                                              curve: Curves.easeOut,
+                                            )
+                                            .slideY(
+                                              begin: 0.1,
+                                              end: 0,
+                                              curve: Curves.easeOut,
+                                              duration: 300.ms,
+                                            ),
                               ),
                     ),
 
@@ -170,8 +213,19 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                   itemCount: userProducts.length,
                                   itemBuilder:
                                       (ctx, i) => ProductListItem(
-                                        product: userProducts[i],
-                                      ),
+                                            product: userProducts[i],
+                                          )
+                                          .animate(delay: (50 * i).ms)
+                                          .fadeIn(
+                                            duration: 300.ms,
+                                            curve: Curves.easeOut,
+                                          )
+                                          .slideY(
+                                            begin: 0.1,
+                                            end: 0,
+                                            curve: Curves.easeOut,
+                                            duration: 300.ms,
+                                          ),
                                 ),
                       ),
                     ],
@@ -185,6 +239,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
           );
         },
         child: const Icon(Icons.add),
+      ).animate().scale(
+        duration: 300.ms,
+        curve: Curves.elasticOut,
+        delay: 300.ms,
       ),
     );
   }

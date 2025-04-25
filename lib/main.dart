@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'providers/product_provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/user_provider.dart';
+import 'providers/theme_provider.dart';
 import 'theme.dart';
 import 'screens/splash_screen.dart';
 
@@ -17,7 +18,7 @@ void main() {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Set system UI overlay style
+  // Set system UI overlay style - will be updated dynamically based on theme
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -47,12 +48,34 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
-      child: MaterialApp(
-        title: 'Fluffyn E-Commerce',
-        theme: AppTheme.lightTheme,
-        home: const SplashScreen(),
-        debugShowCheckedModeBanner: false,
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          // Update system UI based on theme
+          SystemChrome.setSystemUIOverlayStyle(
+            SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness:
+                  themeProvider.isDarkMode ? Brightness.light : Brightness.dark,
+              systemNavigationBarColor:
+                  themeProvider.isDarkMode
+                      ? AppTheme.darkTheme.scaffoldBackgroundColor
+                      : AppTheme.lightTheme.scaffoldBackgroundColor,
+              systemNavigationBarIconBrightness:
+                  themeProvider.isDarkMode ? Brightness.light : Brightness.dark,
+            ),
+          );
+
+          return MaterialApp(
+            title: 'Fluffyn E-Commerce',
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeProvider.themeMode,
+            home: const SplashScreen(),
+            debugShowCheckedModeBanner: false,
+          );
+        },
       ),
     );
   }

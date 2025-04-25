@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import '../theme.dart';
@@ -15,6 +16,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  bool _showDog = true; // Start with the dog image
 
   @override
   void initState() {
@@ -26,6 +28,20 @@ class _SplashScreenState extends State<SplashScreen>
     );
 
     _controller.forward();
+
+    // Toggle between dog and cat every 1.5 seconds
+    Timer.periodic(const Duration(milliseconds: 1500), (timer) {
+      if (mounted) {
+        setState(() {
+          _showDog = !_showDog;
+        });
+      }
+
+      // Stop the timer after a reasonable time
+      if (timer.tick > 3) {
+        timer.cancel();
+      }
+    });
 
     // Navigate to product screen after splash delay
     Timer(const Duration(milliseconds: 3200), () {
@@ -88,7 +104,7 @@ class _SplashScreenState extends State<SplashScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo - Single paw print in circular background
+                // Logo - Pet images in circular background
                 SizedBox(
                       width: 180,
                       height: 180,
@@ -101,16 +117,32 @@ class _SplashScreenState extends State<SplashScreen>
                             height: 180,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withOpacity(0.3),
                             ),
                           ),
-                          // Single centered paw print
-                          Text(
-                            "🐾",
-                            style: TextStyle(
-                              fontSize: 70,
-                              color: Colors.teal.shade300,
+                          // Show either dog or cat with crossfade animation
+                          AnimatedCrossFade(
+                            firstChild: ClipOval(
+                              child: Image.asset(
+                                'assets/images/dog.jpg',
+                                width: 170,
+                                height: 170,
+                                fit: BoxFit.cover,
+                              ),
                             ),
+                            secondChild: ClipOval(
+                              child: Image.asset(
+                                'assets/images/cat.jpg',
+                                width: 170,
+                                height: 170,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            crossFadeState:
+                                _showDog
+                                    ? CrossFadeState.showFirst
+                                    : CrossFadeState.showSecond,
+                            duration: const Duration(milliseconds: 500),
                           ),
                         ],
                       ),

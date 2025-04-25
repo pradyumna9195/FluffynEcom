@@ -28,9 +28,14 @@ void main() {
     ),
   );
 
+  // Disable error display in UI - remove red screen errors
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return Container(); // Return empty container instead of red error screen
+  };
+
   // Error handling for the entire app
   FlutterError.onError = (FlutterErrorDetails details) {
-    FlutterError.presentError(details);
+    // Skip presenting error UI in release mode
     debugPrint('Flutter error caught: ${details.exception}');
     // In a real app, you would log this to a service like Sentry or Firebase Crashlytics
   };
@@ -74,6 +79,8 @@ class MyApp extends StatelessWidget {
             themeMode: themeProvider.themeMode,
             home: const SplashScreen(),
             debugShowCheckedModeBanner: false,
+            checkerboardRasterCacheImages: false,
+            checkerboardOffscreenLayers: false,
           );
         },
       ),

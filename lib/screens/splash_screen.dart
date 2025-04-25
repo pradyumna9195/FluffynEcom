@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:lottie/lottie.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import '../theme.dart';
 import 'products_screen.dart';
@@ -16,7 +15,6 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  bool _showLoadingIndicator = false;
 
   @override
   void initState() {
@@ -28,15 +26,6 @@ class _SplashScreenState extends State<SplashScreen>
     );
 
     _controller.forward();
-
-    // Show loading indicator after animations
-    Timer(const Duration(milliseconds: 1800), () {
-      if (mounted) {
-        setState(() {
-          _showLoadingIndicator = true;
-        });
-      }
-    });
 
     // Navigate to product screen after splash delay
     Timer(const Duration(milliseconds: 3200), () {
@@ -99,18 +88,31 @@ class _SplashScreenState extends State<SplashScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo and animation
+                // Logo - Single paw print in circular background
                 SizedBox(
                       width: 180,
                       height: 180,
-                      child: Lottie.asset(
-                        'assets/animations/shopping_cart.json',
-                        controller: _controller,
-                        onLoaded: (composition) {
-                          _controller
-                            ..duration = composition.duration
-                            ..forward();
-                        },
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Circular background
+                          Container(
+                            width: 180,
+                            height: 180,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withOpacity(0.2),
+                            ),
+                          ),
+                          // Single centered paw print
+                          Text(
+                            "🐾",
+                            style: TextStyle(
+                              fontSize: 70,
+                              color: Colors.teal.shade300,
+                            ),
+                          ),
+                        ],
                       ),
                     )
                     .animate()
@@ -165,33 +167,6 @@ class _SplashScreenState extends State<SplashScreen>
                       duration: 800.ms,
                       curve: Curves.easeOutCubic,
                     ),
-
-                const SizedBox(height: 60),
-
-                // Loading indicator
-                if (_showLoadingIndicator)
-                  Container(
-                        width: 200,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const LinearProgressIndicator(
-                          backgroundColor: Colors.transparent,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
-                          ),
-                        ),
-                      )
-                      .animate()
-                      .fadeIn(duration: 400.ms)
-                      .slideY(
-                        begin: 0.3,
-                        end: 0,
-                        duration: 400.ms,
-                        curve: Curves.easeOut,
-                      ),
               ],
             ),
           ),
